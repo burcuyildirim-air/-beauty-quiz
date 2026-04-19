@@ -1,0 +1,380 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Güzellik Rutini Quiz</title>
+  <style>
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+
+    body {
+      font-family: 'Segoe UI', sans-serif;
+      background: linear-gradient(135deg, #fce4ec, #f8bbd0, #e1bee7);
+      min-height: 100vh;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 20px;
+    }
+
+    .card {
+      background: white;
+      border-radius: 20px;
+      padding: 40px;
+      max-width: 560px;
+      width: 100%;
+      box-shadow: 0 10px 40px rgba(0,0,0,0.1);
+    }
+
+    h1 {
+      font-size: 1.6rem;
+      color: #ad1457;
+      margin-bottom: 8px;
+      text-align: center;
+    }
+
+    .subtitle {
+      text-align: center;
+      color: #888;
+      font-size: 0.9rem;
+      margin-bottom: 30px;
+    }
+
+    .progress-bar {
+      background: #f8bbd0;
+      border-radius: 10px;
+      height: 6px;
+      margin-bottom: 28px;
+      overflow: hidden;
+    }
+
+    .progress-fill {
+      background: #e91e63;
+      height: 100%;
+      border-radius: 10px;
+      transition: width 0.4s ease;
+    }
+
+    .question-number {
+      font-size: 0.8rem;
+      color: #e91e63;
+      font-weight: 600;
+      margin-bottom: 10px;
+      text-transform: uppercase;
+      letter-spacing: 1px;
+    }
+
+    .question-text {
+      font-size: 1.15rem;
+      color: #333;
+      margin-bottom: 24px;
+      line-height: 1.5;
+    }
+
+    .options {
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+    }
+
+    .option-btn {
+      padding: 14px 18px;
+      border: 2px solid #f8bbd0;
+      border-radius: 12px;
+      background: white;
+      color: #555;
+      font-size: 0.95rem;
+      cursor: pointer;
+      text-align: left;
+      transition: all 0.2s;
+    }
+
+    .option-btn:hover {
+      border-color: #e91e63;
+      background: #fce4ec;
+      color: #ad1457;
+    }
+
+    /* Result */
+    .result { display: none; text-align: center; }
+
+    .result-emoji {
+      font-size: 4rem;
+      margin-bottom: 16px;
+    }
+
+    .result-title {
+      font-size: 1.5rem;
+      color: #ad1457;
+      margin-bottom: 12px;
+      font-weight: 700;
+    }
+
+    .result-desc {
+      color: #555;
+      line-height: 1.7;
+      margin-bottom: 28px;
+      font-size: 0.95rem;
+    }
+
+    .routine-list {
+      background: #fce4ec;
+      border-radius: 14px;
+      padding: 20px;
+      text-align: left;
+      margin-bottom: 28px;
+    }
+
+    .routine-list h3 {
+      color: #ad1457;
+      margin-bottom: 12px;
+      font-size: 1rem;
+    }
+
+    .routine-list ul {
+      list-style: none;
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+    }
+
+    .routine-list li::before {
+      content: "✨ ";
+    }
+
+    .routine-list li {
+      color: #555;
+      font-size: 0.9rem;
+    }
+
+    .restart-btn {
+      padding: 14px 32px;
+      background: #e91e63;
+      color: white;
+      border: none;
+      border-radius: 12px;
+      font-size: 1rem;
+      cursor: pointer;
+      transition: background 0.2s;
+    }
+
+    .restart-btn:hover {
+      background: #ad1457;
+    }
+
+    #quiz-section { display: block; }
+  </style>
+</head>
+<body>
+<div class="card">
+
+  <!-- Quiz -->
+  <div id="quiz-section">
+    <h1>💄 Güzellik Rutini Quiz</h1>
+    <p class="subtitle">Sana özel rutin için 6 soru</p>
+    <div class="progress-bar">
+      <div class="progress-fill" id="progress"></div>
+    </div>
+    <div class="question-number" id="q-number"></div>
+    <div class="question-text" id="q-text"></div>
+    <div class="options" id="q-options"></div>
+  </div>
+
+  <!-- Result -->
+  <div class="result" id="result-section">
+    <div class="result-emoji" id="r-emoji"></div>
+    <div class="result-title" id="r-title"></div>
+    <div class="result-desc" id="r-desc"></div>
+    <div class="routine-list">
+      <h3>Senin için önerilen rutin:</h3>
+      <ul id="r-list"></ul>
+    </div>
+    <button class="restart-btn" onclick="restart()">Tekrar Dene</button>
+  </div>
+
+</div>
+
+<script>
+const questions = [
+  {
+    text: "Sabah uyandığında cildin nasıl hissettiriyor?",
+    options: [
+      { label: "Çok parlak ve yağlı", value: "oily" },
+      { label: "Gergin ve sıkı", value: "dry" },
+      { label: "Bazı bölgeler yağlı, bazıları kuru", value: "combo" },
+      { label: "Normal, dengeli", value: "normal" },
+    ]
+  },
+  {
+    text: "Günde kaç saat uyuyorsun?",
+    options: [
+      { label: "5 saatten az", value: "low_sleep" },
+      { label: "5-7 saat arası", value: "mid_sleep" },
+      { label: "7-9 saat", value: "good_sleep" },
+      { label: "9 saatten fazla", value: "high_sleep" },
+    ]
+  },
+  {
+    text: "Su tüketimin nasıl?",
+    options: [
+      { label: "Çok az içiyorum", value: "low_water" },
+      { label: "Orta düzeyde", value: "mid_water" },
+      { label: "Günde 2 litre ve üzeri", value: "high_water" },
+    ]
+  },
+  {
+    text: "Güneş kremi kullanıyor musun?",
+    options: [
+      { label: "Her gün kullanıyorum", value: "spf_daily" },
+      { label: "Sadece yazın veya güneşliyken", value: "spf_sometimes" },
+      { label: "Hiç kullanmıyorum", value: "spf_never" },
+    ]
+  },
+  {
+    text: "Makyaj sonrası cildini ne sıklıkla temizliyorsun?",
+    options: [
+      { label: "Her gece mutlaka", value: "cleanse_always" },
+      { label: "Çoğu zaman", value: "cleanse_mostly" },
+      { label: "Ara sıra", value: "cleanse_rarely" },
+      { label: "Makyaj yapmıyorum", value: "no_makeup" },
+    ]
+  },
+  {
+    text: "Cilt bakımında en büyük sorunun ne?",
+    options: [
+      { label: "Sivilce ve gözenekler", value: "acne" },
+      { label: "Kuruluk ve soyulma", value: "dryness" },
+      { label: "Leke ve ton eşitsizliği", value: "spots" },
+      { label: "Erken yaşlanma belirtileri", value: "aging" },
+    ]
+  },
+];
+
+const results = {
+  acne: {
+    emoji: "🌿",
+    title: "Arındırıcı & Hafif Rutin",
+    desc: "Cildin gözeneklere ve sivilceye yatkın görünüyor. Hafif, yağsız ürünler ve düzenli temizlik senin için anahtar.",
+    routine: [
+      "Sabah: Köpük temizleyici + hafif nemlendirici (yağsız)",
+      "Güneş kremi SPF 30+ (her gün!)",
+      "Akşam: Çift temizleme (yağ bazlı + köpük)",
+      "Haftada 2x: Salisilik asit içeren tonik",
+      "Haftada 1x: Kil maskesi",
+    ]
+  },
+  dryness: {
+    emoji: "💧",
+    title: "Yoğun Nemlendirici Rutin",
+    desc: "Cildin nem ihtiyacı yüksek. Zengin dokulu ürünler ve hyaluronic acid cildin için çok faydalı olacak.",
+    routine: [
+      "Sabah: Kremsi temizleyici + hyaluronic acid serum",
+      "Zengin nemlendirici krem + SPF",
+      "Akşam: Besleyici yağ veya bakım yağı",
+      "Uyku maskesi haftada 2-3 kez",
+      "Günde 2L su içmeyi hedefle",
+    ]
+  },
+  spots: {
+    emoji: "✨",
+    title: "Ton Eşitleyici Rutin",
+    desc: "Leke ve ton eşitsizliği için düzenli peeling ve aydınlatıcı içerikler çok etkili olacak.",
+    routine: [
+      "Sabah: C vitamini serum + SPF 50 (olmazsa olmaz!)",
+      "Haftada 2x: Niacinamide içeren tonik",
+      "Akşam: AHA/BHA içeren hafif peeling",
+      "Retinol (gece, haftada 2-3 kez başlangıçta)",
+      "Güneş kremsiz dışarı çıkma!",
+    ]
+  },
+  aging: {
+    emoji: "🌸",
+    title: "Anti-Aging & Bakım Rutini",
+    desc: "Erken yaşlanma belirtilerine karşı retinol ve antioksidanlar en güçlü silahların.",
+    routine: [
+      "Sabah: Antioksidan serum (C vitamini) + SPF 50",
+      "Zengin nemlendirici (peptit içerikli)",
+      "Akşam: Retinol serum (yavaş başla)",
+      "Göz altı kremi (sabah & akşam)",
+      "Uyku kalitesine dikkat et!",
+    ]
+  },
+};
+
+let current = 0;
+let scores = { acne: 0, dryness: 0, spots: 0, aging: 0 };
+
+function skinTypeToCategory(value) {
+  if (value === "oily") return "acne";
+  if (value === "dry") return "dryness";
+  if (value === "combo") return "acne";
+  if (value === "normal") return "spots";
+  if (value === "low_sleep" || value === "mid_sleep") return "aging";
+  if (value === "low_water") return "dryness";
+  if (value === "spf_never" || value === "spf_sometimes") return "spots";
+  if (value === "cleanse_rarely") return "acne";
+  return value; // last question maps directly
+}
+
+function render() {
+  const q = questions[current];
+  document.getElementById("q-number").textContent = `Soru ${current + 1} / ${questions.length}`;
+  document.getElementById("q-text").textContent = q.text;
+  document.getElementById("progress").style.width = `${((current) / questions.length) * 100}%`;
+
+  const opts = document.getElementById("q-options");
+  opts.innerHTML = "";
+  q.options.forEach(opt => {
+    const btn = document.createElement("button");
+    btn.className = "option-btn";
+    btn.textContent = opt.label;
+    btn.onclick = () => answer(opt.value);
+    opts.appendChild(btn);
+  });
+}
+
+function answer(value) {
+  const category = skinTypeToCategory(value);
+  if (scores[category] !== undefined) scores[category]++;
+
+  current++;
+  if (current >= questions.length) {
+    showResult();
+  } else {
+    render();
+  }
+}
+
+function showResult() {
+  document.getElementById("progress").style.width = "100%";
+  document.getElementById("quiz-section").style.display = "none";
+  document.getElementById("result-section").style.display = "block";
+
+  const best = Object.entries(scores).sort((a, b) => b[1] - a[1])[0][0];
+  const r = results[best];
+
+  document.getElementById("r-emoji").textContent = r.emoji;
+  document.getElementById("r-title").textContent = r.title;
+  document.getElementById("r-desc").textContent = r.desc;
+
+  const list = document.getElementById("r-list");
+  list.innerHTML = "";
+  r.routine.forEach(item => {
+    const li = document.createElement("li");
+    li.textContent = item;
+    list.appendChild(li);
+  });
+}
+
+function restart() {
+  current = 0;
+  scores = { acne: 0, dryness: 0, spots: 0, aging: 0 };
+  document.getElementById("quiz-section").style.display = "block";
+  document.getElementById("result-section").style.display = "none";
+  render();
+}
+
+render();
+</script>
+</body>
+</html>
